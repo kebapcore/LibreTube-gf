@@ -7,6 +7,9 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">true</item>
 
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="fontFamily">sans-serif</item>
+
         <item name="switchPreferenceCompatStyle">
             @style/Preference.SwitchPreferenceCompat.Material3
         </item>

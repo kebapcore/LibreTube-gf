@@ -8,10 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.github.libretube.R
 import com.github.libretube.api.obj.StreamItem
-import com.github.libretube.constants.PreferenceKeys
-import com.github.libretube.constants.PreferenceKeys.HOME_TAB_CONTENT
 import com.github.libretube.databinding.FragmentHomeBinding
-import com.github.libretube.helpers.PreferenceHelper
 import com.github.libretube.ui.adapters.VideoCardsAdapter
 import com.github.libretube.ui.models.HomeViewModel
 import com.github.libretube.ui.models.SubscriptionsViewModel
@@ -33,6 +30,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.homeRV.adapter = homeAdapter
 
         with(homeViewModel) {
+            trending.observe(viewLifecycleOwner, ::showTrending)
             feed.observe(viewLifecycleOwner, ::showFeed)
             isLoading.observe(viewLifecycleOwner, ::updateLoading)
         }
@@ -62,23 +60,28 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private fun fetchHomeFeed() {
         binding.nothingHere.isGone = true
-        val defaultItems = resources.getStringArray(R.array.homeTabItemsValues)
-        val visibleItems = PreferenceHelper.getStringSet(HOME_TAB_CONTENT, defaultItems.toSet())
-
         homeViewModel.loadHomeFeed(
             context = requireContext(),
             subscriptionsViewModel = subscriptionsViewModel,
-            visibleItems = visibleItems,
+            // GF Edition: Home = Türkiye trendleri
+            visibleItems = setOf("trending"),
             onUnusualLoadTime = {}
         )
     }
 
+    private fun showTrending(trends: Pair<com.github.libretube.api.TrendingCategory, com.github.libretube.ui.models.TrendsViewModel.TrendingStreams>?) {
+        if (trends == null) return
+        val (_, trendingStreams) = trends
+        binding.homeRV.isVisible = true
+        homeAdapter.submitList(trendingStreams.streams.take(30))
+    }
+
     private fun showFeed(streamItems: List<StreamItem>?) {
+        // GF Edition: subscriptions feed is not the Home source anymore
+        // Keep this observer for compatibility; ignore for now.
         if (streamItems == null) return
 
-        binding.homeRV.isVisible = true
-        val feedVideos = streamItems.take(20)
-        homeAdapter.submitList(feedVideos)
+        // no-op
     }
 
     private fun updateLoading(isLoading: Boolean) {

@@ -44,11 +44,8 @@ interface MediaServiceRepository {
 
     companion object {
         val instance: MediaServiceRepository
-            get() = when {
-                PlayerHelper.fullLocalMode -> NewPipeMediaServiceRepository()
-                PlayerHelper.localStreamExtraction -> LocalStreamsExtractionPipedMediaServiceRepository()
-                else -> NewPipeMediaServiceRepository()
-            }
+            // GF Edition: hard-disable Piped backend; always use local NewPipe extractor
+            get() = NewPipeMediaServiceRepository()
     }
 }
 

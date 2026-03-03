@@ -143,6 +143,20 @@ object PreferenceHelper {
     fun initialize(context: Context) {
         settings = getDefaultSharedPreferences(context)
         authSettings = getAuthenticationPreferences(context)
+
+        // GF Edition defaults (enforce stable defaults)
+        if (getString(PreferenceKeys.THEME_MODE, "D") != "D") {
+            putString(PreferenceKeys.THEME_MODE, "D")
+        }
+        if (getString(PreferenceKeys.ACCENT_COLOR, "violet") != "violet") {
+            putString(PreferenceKeys.ACCENT_COLOR, "violet")
+        }
+        if (!settings.contains(PreferenceKeys.REGION) || getString(PreferenceKeys.REGION, "TR") == "sys") {
+            putString(PreferenceKeys.REGION, "TR")
+        }
+        if (!settings.contains(PreferenceKeys.TRENDING_CATEGORY)) {
+            putString(PreferenceKeys.TRENDING_CATEGORY, TrendingCategory.MUSIC.name)
+        }
     }
 
     /**

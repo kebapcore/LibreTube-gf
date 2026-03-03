@@ -14,8 +14,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.github.libretube.R
-import com.github.libretube.api.InstanceRepository
-import com.github.libretube.api.RetrofitInstance
 import com.github.libretube.api.obj.PipedInstance
 import com.github.libretube.constants.PreferenceKeys
 import com.github.libretube.helpers.BackupHelper
@@ -25,27 +23,13 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 class WelcomeViewModel(
-    private val instanceRepository: InstanceRepository,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val _uiState = savedStateHandle.getStateFlow(UI_STATE, UiState())
     val uiState = _uiState.asLiveData()
 
-    init {
-        viewModelScope.launch {
-            instanceRepository.getInstances()
-                .onSuccess { instances ->
-                    savedStateHandle[UI_STATE] = _uiState.value.copy(instances = instances)
-                }
-                .onFailure {
-                    savedStateHandle[UI_STATE] = _uiState.value.copy(
-                        instances = InstanceRepository.FALLBACK_INSTANCES,
-                        error = R.string.failed_fetching_instances,
-                    )
-                }
-        }
-    }
+    // GF Edition: Piped/instance selection removed. Welcome is just a lightweight first-run screen.
 
     fun setFullLocalModeEnabled(enabled: Boolean) {
         savedStateHandle[UI_STATE] = _uiState.value.copy(fullLocalMode = enabled)
@@ -56,40 +40,20 @@ class WelcomeViewModel(
     }
 
     fun onConfirmSettings() {
-        val fullLocalMode = _uiState.value.fullLocalMode
-        val selectedInstanceIndex = _uiState.value.selectedInstanceIndex
-
-        if (fullLocalMode) {
-            PreferenceHelper.putBoolean(PreferenceKeys.FULL_LOCAL_MODE, true)
-            PreferenceHelper.putBoolean(PreferenceKeys.LOCAL_FEED_EXTRACTION, true)
-            refreshAndNavigate()
-        } else if (selectedInstanceIndex == null) {
-            savedStateHandle[UI_STATE] = _uiState.value.copy(error = R.string.choose_instance)
-        } else {
-            PreferenceHelper.putString(
-                PreferenceKeys.FETCH_INSTANCE,
-                _uiState.value.instances[selectedInstanceIndex].apiUrl
-            )
-            PreferenceHelper.putBoolean(PreferenceKeys.FULL_LOCAL_MODE, false)
-            refreshAndNavigate()
-        }
+        PreferenceHelper.putBoolean(PreferenceKeys.FULL_LOCAL_MODE, true)
+        PreferenceHelper.putBoolean(PreferenceKeys.LOCAL_FEED_EXTRACTION, true)
+        refreshAndNavigate()
     }
 
     fun restoreAdvancedBackup(context: Context, uri: Uri) {
         viewModelScope.launch {
             BackupHelper.restoreAdvancedBackup(context, uri)
 
-            // only skip the welcome activity if the restored backup contains an instance
-            val instancePref = PreferenceHelper.getString(PreferenceKeys.FETCH_INSTANCE, "")
-            if (instancePref.isNotEmpty() || PlayerHelper.fullLocalMode) {
-                refreshAndNavigate()
-            }
+            refreshAndNavigate()
         }
     }
 
     private fun refreshAndNavigate() {
-        // refresh the api urls since they have changed likely
-        RetrofitInstance.apiLazyMgr.reset()
         savedStateHandle[UI_STATE] = _uiState.value.copy(navigateToMain = Unit)
     }
 
@@ -116,7 +80,6 @@ class WelcomeViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 WelcomeViewModel(
-                    instanceRepository = InstanceRepository(),
                     savedStateHandle = createSavedStateHandle(),
                 )
             }

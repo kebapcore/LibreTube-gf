@@ -24,7 +24,12 @@ object ThemeHelper {
     fun updateTheme(activity: AppCompatActivity) {
         var accentColor = PreferenceHelper.getString(PreferenceKeys.ACCENT_COLOR, "")
         if (accentColor.isEmpty()) {
-            accentColor = if (DynamicColors.isDynamicColorAvailable()) "my" else "blue"
+            // GF Edition default: violet / deep pink accent (no Material You by default)
+            accentColor = "violet"
+            PreferenceHelper.putString(PreferenceKeys.ACCENT_COLOR, accentColor)
+        } else if (accentColor != "violet") {
+            // GF Edition: force violet accent for a consistent look
+            accentColor = "violet"
             PreferenceHelper.putString(PreferenceKeys.ACCENT_COLOR, accentColor)
         }
 

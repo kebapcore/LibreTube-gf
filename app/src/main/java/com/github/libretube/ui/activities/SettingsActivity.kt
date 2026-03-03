@@ -27,9 +27,7 @@ class SettingsActivity : BaseActivity() {
             .build()
         binding.toolbar.setupWithNavController(navController, appBarConfiguration)
 
-        if (intent.extras?.getString(REDIRECT_KEY) == REDIRECT_TO_INTENT_SETTINGS) {
-            navController.navigate(R.id.action_global_instanceSettings)
-        }
+        // GF Edition: Piped/instance settings removed
     }
 
     companion object {

@@ -3,13 +3,9 @@ package com.github.libretube.ui.activities
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
+import androidx.activity.result.contract.ActivityResultContracts
 import com.github.libretube.databinding.ActivityWelcomeBinding
-import com.github.libretube.ui.adapters.InstancesAdapter
 import com.github.libretube.ui.base.BaseActivity
 import com.github.libretube.ui.models.WelcomeViewModel
 import com.github.libretube.ui.preferences.BackupRestoreSettings
@@ -30,12 +26,6 @@ class WelcomeActivity : BaseActivity() {
         val binding = ActivityWelcomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val adapter = InstancesAdapter(
-            viewModel.uiState.value?.selectedInstanceIndex,
-            viewModel::setSelectedInstanceIndex,
-        )
-        binding.instancesRecycler.adapter = adapter
-
         binding.okay.setOnClickListener {
             viewModel.onConfirmSettings()
         }
@@ -44,23 +34,12 @@ class WelcomeActivity : BaseActivity() {
             restoreFilePicker.launch(BackupRestoreSettings.JSON)
         }
 
-        binding.operationModeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (checkedId == binding.fullLocalModeToggleGroupButton.id) viewModel.setFullLocalModeEnabled(isChecked)
-        }
-
-        viewModel.uiState.observe(this) { (fullLocalMode, selectedIndex, instances, error, navigateToMain) ->
-            binding.okay.isEnabled = fullLocalMode || selectedIndex != null
-            binding.progress.isGone = instances.isNotEmpty()
-
-            binding.instancesContainer.isVisible = !fullLocalMode
-            binding.localModeInfoContainer.isVisible = fullLocalMode
-
-            if (!fullLocalMode) adapter.submitList(instances)
-
-            error?.let {
-                Toast.makeText(this, it, Toast.LENGTH_LONG).show()
-                viewModel.onErrorShown()
-            }
+        viewModel.uiState.observe(this) { (_, _, _, _, navigateToMain) ->
+            // GF Edition: always full local mode (no Piped selection)
+            binding.okay.isEnabled = true
+            binding.progress.visibility = android.view.View.GONE
+            binding.instancesContainer.visibility = android.view.View.GONE
+            binding.localModeInfoContainer.visibility = android.view.View.VISIBLE
 
             navigateToMain?.let {
                 val mainActivityIntent = Intent(this, MainActivity::class.java)
