@@ -22,4 +22,14 @@ class InstanceSettings : BasePreferenceFragment() {
         }
     }
 
+    companion object {
+        /**
+         * Fragment result key used by login/logout/delete-account dialogs
+         * to notify this screen about authentication changes.
+         *
+         * Kept for compatibility so existing dialogs and navigation continue
+         * to compile and work in CI/GitHub Actions.
+         */
+        const val INSTANCE_DIALOG_REQUEST_KEY = "instance_dialog_request_key"
+    }
 }
