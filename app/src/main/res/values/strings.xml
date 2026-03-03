@@ -87,6 +87,8 @@
     <string name="music_artists">YT Music Artists</string>
     <string name="sponsorblock">SponsorBlock</string>
     <string name="sponsorblock_summary">Uses the https://sponsor.ajay.app API</string>
+    <string name="sponsorblock_simple_enabled">Auto-skip sponsors</string>
+    <string name="sponsorblock_simple_skip_own_ads">Also skip self-promotion</string>
     <string name="segment_skipped">Skipped segment</string>
     <string name="category_segments">Segments</string>
     <string name="category_sponsor">Sponsor</string>
