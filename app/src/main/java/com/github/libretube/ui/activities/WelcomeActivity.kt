@@ -38,7 +38,6 @@ class WelcomeActivity : BaseActivity() {
             // GF Edition: always full local mode (no Piped selection)
             binding.okay.isEnabled = true
             binding.progress.visibility = android.view.View.GONE
-            binding.instancesContainer.visibility = android.view.View.GONE
             binding.localModeInfoContainer.visibility = android.view.View.VISIBLE
 
             navigateToMain?.let {
