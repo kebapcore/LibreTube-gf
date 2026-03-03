@@ -4,7 +4,8 @@
     <item
         android:id="@+id/homeFragment"
         android:icon="@drawable/ic_home"
-        android:title="@string/startpage" />
+        android:title="@string/startpage"
+        android:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/trendsFragment"
@@ -15,12 +16,14 @@
     <item
         android:id="@+id/subscriptionsFragment"
         android:icon="@drawable/ic_subscriptions"
-        android:title="@string/subscriptions" />
+        android:title="@string/subscriptions"
+        android:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/libraryFragment"
         android:icon="@drawable/ic_library"
-        android:title="@string/library" />
+        android:title="@string/library"
+        android:iconTint="?attr/colorOnSurface" />
 
     <item
         android:id="@+id/downloadsFragment"

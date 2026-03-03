@@ -47,7 +47,7 @@ interface MediaServiceRepository {
             get() = when {
                 PlayerHelper.fullLocalMode -> NewPipeMediaServiceRepository()
                 PlayerHelper.localStreamExtraction -> LocalStreamsExtractionPipedMediaServiceRepository()
-                else -> PipedMediaServiceRepository()
+                else -> NewPipeMediaServiceRepository()
             }
     }
 }
