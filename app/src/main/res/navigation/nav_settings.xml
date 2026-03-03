@@ -20,6 +20,11 @@
         android:label="@string/general" />
 
     <fragment
+        android:id="@+id/youtubeAccountSettings"
+        android:name="com.github.libretube.ui.preferences.YouTubeAccountSettings"
+        android:label="@string/account" />
+
+    <fragment
         android:id="@+id/appearanceSettings"
         android:name="com.github.libretube.ui.preferences.AppearanceSettings"
         android:label="@string/appearance" />
@@ -51,6 +56,14 @@
     <action
         android:id="@+id/action_global_generalSettings"
         app:destination="@id/generalSettings"
+        app:enterAnim="@animator/nav_default_enter_anim"
+        app:exitAnim="@animator/nav_default_exit_anim"
+        app:popEnterAnim="@animator/nav_default_pop_enter_anim"
+        app:popExitAnim="@animator/nav_default_pop_exit_anim" />
+
+    <action
+        android:id="@+id/action_global_youtubeAccountSettings"
+        app:destination="@id/youtubeAccountSettings"
         app:enterAnim="@animator/nav_default_enter_anim"
         app:exitAnim="@animator/nav_default_exit_anim"
         app:popEnterAnim="@animator/nav_default_pop_enter_anim"

@@ -30,7 +30,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.homeRV.adapter = homeAdapter
 
         with(homeViewModel) {
-            trending.observe(viewLifecycleOwner, ::showTrending)
             feed.observe(viewLifecycleOwner, ::showFeed)
             isLoading.observe(viewLifecycleOwner, ::updateLoading)
         }
@@ -63,25 +62,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         homeViewModel.loadHomeFeed(
             context = requireContext(),
             subscriptionsViewModel = subscriptionsViewModel,
-            // GF Edition: Home = Türkiye trendleri
-            visibleItems = setOf("trending"),
+            // GF Edition: Home = subscription feed (signed-in: YouTube Data API, signed-out: local)
+            visibleItems = setOf("featured"),
             onUnusualLoadTime = {}
         )
     }
 
-    private fun showTrending(trends: Pair<com.github.libretube.api.TrendingCategory, com.github.libretube.ui.models.TrendsViewModel.TrendingStreams>?) {
-        if (trends == null) return
-        val (_, trendingStreams) = trends
-        binding.homeRV.isVisible = true
-        homeAdapter.submitList(trendingStreams.streams.take(30))
-    }
-
     private fun showFeed(streamItems: List<StreamItem>?) {
-        // GF Edition: subscriptions feed is not the Home source anymore
-        // Keep this observer for compatibility; ignore for now.
         if (streamItems == null) return
 
-        // no-op
+        binding.homeRV.isVisible = true
+        homeAdapter.submitList(streamItems)
     }
 
     private fun updateLoading(isLoading: Boolean) {

@@ -9,8 +9,9 @@ import com.github.libretube.enums.PlaylistType
 import com.github.libretube.helpers.PreferenceHelper
 import com.github.libretube.obj.PipedImportPlaylist
 import com.github.libretube.repo.LocalPlaylistsRepository
-import com.github.libretube.repo.PipedPlaylistRepository
 import com.github.libretube.repo.PlaylistRepository
+import com.github.libretube.repo.YouTubePlaylistsRepository
+import com.github.libretube.youtube.YouTubeAuthManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -21,11 +22,9 @@ object PlaylistsHelper {
         "[\\da-fA-F]{8}-[\\da-fA-F]{4}-[\\da-fA-F]{4}-[\\da-fA-F]{4}-[\\da-fA-F]{12}".toRegex()
     const val MAX_CONCURRENT_IMPORT_CALLS = 5
 
-    private val token get() = PreferenceHelper.getToken()
-    val loggedIn: Boolean get() = token.isNotEmpty()
     private val playlistsRepository: PlaylistRepository
         get() = when {
-            loggedIn -> PipedPlaylistRepository()
+            YouTubeAuthManager.isSignedIn() -> YouTubePlaylistsRepository()
             else -> LocalPlaylistsRepository()
         }
 
@@ -49,8 +48,18 @@ object PlaylistsHelper {
     }
 
     suspend fun getPlaylist(playlistId: String): Playlist {
-        // load locally stored playlists with the auth api
-        return when (getPlaylistType(playlistId)) {
+        val type = getPlaylistType(playlistId)
+
+        // Signed-in: use YouTube Data API for all remote playlists.
+        if (YouTubeAuthManager.isSignedIn()) {
+            return when (type) {
+                PlaylistType.LOCAL -> LocalPlaylistsRepository().getPlaylist(playlistId)
+                else -> YouTubePlaylistsRepository().getPlaylist(playlistId)
+            }
+        }
+
+        // Signed-out: use local DB for local playlists; NewPipe extractor for public playlists.
+        return when (type) {
             PlaylistType.PUBLIC -> MediaServiceRepository.instance.getPlaylist(playlistId)
             else -> playlistsRepository.getPlaylist(playlistId)
         }
@@ -88,7 +97,7 @@ object PlaylistsHelper {
     suspend fun deletePlaylist(playlistId: String) = playlistsRepository.deletePlaylist(playlistId)
 
     fun getPrivatePlaylistType(): PlaylistType {
-        return if (loggedIn) PlaylistType.PRIVATE else PlaylistType.LOCAL
+        return if (YouTubeAuthManager.isSignedIn()) PlaylistType.PRIVATE else PlaylistType.LOCAL
     }
 
     fun getPlaylistType(playlistId: String): PlaylistType {

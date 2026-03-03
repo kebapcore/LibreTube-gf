@@ -3,6 +3,8 @@ package com.github.libretube.helpers
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.github.libretube.LibreTubeApp
@@ -144,11 +146,11 @@ object PreferenceHelper {
         settings = getDefaultSharedPreferences(context)
         authSettings = getAuthenticationPreferences(context)
 
-        // GF Edition defaults (enforce stable defaults)
-        if (getString(PreferenceKeys.THEME_MODE, "D") != "D") {
+        // GF Edition defaults (set only once; keep user choice afterwards)
+        if (!settings.contains(PreferenceKeys.THEME_MODE)) {
             putString(PreferenceKeys.THEME_MODE, "D")
         }
-        if (getString(PreferenceKeys.ACCENT_COLOR, "violet") != "violet") {
+        if (!settings.contains(PreferenceKeys.ACCENT_COLOR)) {
             putString(PreferenceKeys.ACCENT_COLOR, "violet")
         }
         if (!settings.contains(PreferenceKeys.REGION) || getString(PreferenceKeys.REGION, "TR") == "sys") {
@@ -238,6 +240,49 @@ object PreferenceHelper {
         authSettings.edit { putString(PreferenceKeys.TOKEN, newValue) }
     }
 
+    fun getYouTubeAccessToken(): String {
+        return authSettings.getString(PreferenceKeys.YT_ACCESS_TOKEN, "").orEmpty()
+    }
+
+    fun setYouTubeAccessToken(newValue: String) {
+        authSettings.edit { putString(PreferenceKeys.YT_ACCESS_TOKEN, newValue) }
+    }
+
+    fun getYouTubeRefreshToken(): String {
+        return authSettings.getString(PreferenceKeys.YT_REFRESH_TOKEN, "").orEmpty()
+    }
+
+    fun setYouTubeRefreshToken(newValue: String) {
+        authSettings.edit { putString(PreferenceKeys.YT_REFRESH_TOKEN, newValue) }
+    }
+
+    fun getYouTubeTokenExpiresAtEpochMillis(): Long {
+        return authSettings.getLong(PreferenceKeys.YT_TOKEN_EXPIRES_AT_EPOCH_MILLIS, 0L)
+    }
+
+    fun setYouTubeTokenExpiresAtEpochMillis(newValue: Long) {
+        authSettings.edit { putLong(PreferenceKeys.YT_TOKEN_EXPIRES_AT_EPOCH_MILLIS, newValue) }
+    }
+
+    fun getYouTubeScope(): String {
+        return authSettings.getString(PreferenceKeys.YT_SCOPE, "").orEmpty()
+    }
+
+    fun setYouTubeScope(newValue: String) {
+        authSettings.edit { putString(PreferenceKeys.YT_SCOPE, newValue) }
+    }
+
+    fun clearYouTubeAuth() {
+        authSettings.edit {
+            remove(PreferenceKeys.YT_ACCESS_TOKEN)
+            remove(PreferenceKeys.YT_REFRESH_TOKEN)
+            remove(PreferenceKeys.YT_TOKEN_EXPIRES_AT_EPOCH_MILLIS)
+            remove(PreferenceKeys.YT_SCOPE)
+            remove(PreferenceKeys.YT_CHANNEL_ID)
+            remove(PreferenceKeys.YT_CHANNEL_TITLE)
+        }
+    }
+
     fun getUsername(): String {
         return authSettings.getString(PreferenceKeys.USERNAME, "")!!
     }
@@ -321,6 +366,20 @@ object PreferenceHelper {
     }
 
     private fun getAuthenticationPreferences(context: Context): SharedPreferences {
-        return context.getSharedPreferences(PreferenceKeys.AUTH_PREF_FILE, Context.MODE_PRIVATE)
+        return runCatching {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                context,
+                PreferenceKeys.AUTH_PREF_FILE,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        }.getOrElse {
+            // Fallback to plain prefs if encryption fails on a device/ROM.
+            context.getSharedPreferences(PreferenceKeys.AUTH_PREF_FILE, Context.MODE_PRIVATE)
+        }
     }
 }

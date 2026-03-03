@@ -394,13 +394,14 @@
     <color name="violet_theme_dark_errorContainer">#93000A</color>
     <color name="violet_theme_dark_onError">#690005</color>
     <color name="violet_theme_dark_onErrorContainer">#FFDAD6</color>
-    <color name="violet_theme_dark_background">#050509</color>
+    <!-- Warmer dark: deep magenta / red-tinted background -->
+    <color name="violet_theme_dark_background">#0B0508</color>
     <color name="violet_theme_dark_onBackground">#F6E9F3</color>
-    <color name="violet_theme_dark_surface">#0B0A11</color>
+    <color name="violet_theme_dark_surface">#16070E</color>
     <color name="violet_theme_dark_onSurface">#F6E9F3</color>
-    <color name="violet_theme_dark_surfaceVariant">#1C1722</color>
-    <color name="violet_theme_dark_onSurfaceVariant">#C9B3C5</color>
-    <color name="violet_theme_dark_outline">#8D7489</color>
+    <color name="violet_theme_dark_surfaceVariant">#2A0E1B</color>
+    <color name="violet_theme_dark_onSurfaceVariant">#E3C1D4</color>
+    <color name="violet_theme_dark_outline">#9E6C86</color>
     <color name="violet_theme_dark_inverseOnSurface">#0B0A11</color>
     <color name="violet_theme_dark_inverseSurface">#F6E9F3</color>
     <color name="violet_theme_dark_inversePrimary">#FF2B7B</color>

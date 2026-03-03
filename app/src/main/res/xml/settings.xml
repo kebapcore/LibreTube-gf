@@ -8,6 +8,12 @@
         app:key="general"
         app:title="@string/general" />
 
+    <Preference
+        android:icon="@drawable/ic_login_filled"
+        android:summary="@string/account_summary"
+        app:key="account"
+        app:title="@string/account" />
+
     <!-- GF Edition: Piped/instance ayarları kaldırıldı -->
 
     <Preference

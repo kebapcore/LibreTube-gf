@@ -40,6 +40,7 @@ class MainSettings : BasePreferenceFragment() {
         
         listOf(
             "general" to R.id.action_global_generalSettings,
+            "account" to R.id.action_global_youtubeAccountSettings,
             "appearance" to R.id.action_global_appearanceSettings,
             "sponsorblock" to R.id.action_global_sponsorBlockSettings,
             "player" to R.id.action_global_playerSettings,

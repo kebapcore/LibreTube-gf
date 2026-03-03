@@ -36,6 +36,11 @@ android {
         versionName = "0.30.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         resValue("string", "app_name", "LibreTube")
+
+        // Google OAuth device flow (TV & limited input) client ID
+        // Supply via Gradle property: -PYOUTUBE_OAUTH_CLIENT_ID=...
+        val ytClientId = (project.findProperty("YOUTUBE_OAUTH_CLIENT_ID") as String?)?.trim().orEmpty()
+        buildConfigField("String", "YOUTUBE_OAUTH_CLIENT_ID", "\"$ytClientId\"")
     }
 
     ksp {
@@ -136,6 +141,7 @@ dependencies {
     implementation(libs.androidx.collection)
     implementation(libs.androidx.media)
     implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.androidx.security.crypto)
 
     /* Android Lifecycle */
     implementation(libs.lifecycle.viewmodel)

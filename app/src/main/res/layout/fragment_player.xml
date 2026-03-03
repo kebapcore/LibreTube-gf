@@ -45,39 +45,51 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/relPlayer_share"
-                        style="@style/PlayerActionsButton"
-                        android:text="@string/share"
-                        app:icon="@drawable/ic_share" />
+                        style="@style/Widget.Material3.Button.IconButton"
+                        android:contentDescription="@string/share"
+                        app:icon="@drawable/ic_share"
+                        app:iconSize="20dp"
+                        app:iconTint="?attr/colorOnSurface" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/relPlayer_download"
-                        style="@style/PlayerActionsButton"
-                        android:text="@string/download"
-                        app:icon="@drawable/ic_download" />
+                        style="@style/Widget.Material3.Button.IconButton"
+                        android:contentDescription="@string/download"
+                        app:icon="@drawable/ic_download"
+                        app:iconSize="20dp"
+                        app:iconTint="?attr/colorOnSurface" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/relPlayer_save"
-                        style="@style/PlayerActionsButton"
-                        android:text="@string/save"
-                        app:icon="@drawable/ic_save" />
+                        style="@style/Widget.Material3.Button.IconButton"
+                        android:contentDescription="@string/save"
+                        app:icon="@drawable/ic_save"
+                        app:iconSize="20dp"
+                        app:iconTint="?attr/colorOnSurface" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/relPlayer_background"
-                        style="@style/PlayerActionsButton"
-                        android:text="@string/audio"
-                        app:icon="@drawable/ic_headphones" />
+                        style="@style/Widget.Material3.Button.IconButton"
+                        android:contentDescription="@string/audio"
+                        app:icon="@drawable/ic_headphones"
+                        app:iconSize="20dp"
+                        app:iconTint="?attr/colorOnSurface" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/relPlayer_pip"
-                        style="@style/PlayerActionsButton"
-                        android:text="@string/pip"
-                        app:icon="@drawable/ic_open" />
+                        style="@style/Widget.Material3.Button.IconButton"
+                        android:contentDescription="@string/pip"
+                        app:icon="@drawable/ic_open"
+                        app:iconSize="20dp"
+                        app:iconTint="?attr/colorOnSurface" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/relPlayer_screenshot"
-                        style="@style/PlayerActionsButton"
-                        android:text="@string/screenshot"
-                        app:icon="@drawable/ic_copy" />
+                        style="@style/Widget.Material3.Button.IconButton"
+                        android:contentDescription="@string/screenshot"
+                        app:icon="@drawable/ic_copy"
+                        app:iconSize="20dp"
+                        app:iconTint="?attr/colorOnSurface" />
                 </LinearLayout>
 
             </HorizontalScrollView>
@@ -94,8 +106,8 @@
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/player_channelImage"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
                     android:layout_gravity="center"
                     android:layout_marginEnd="4dp"
                     app:shapeAppearance="@style/CircleImageView" />
@@ -116,7 +128,7 @@
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
                         android:maxLines="1"
-                        android:textSize="15sp" />
+                        android:textSize="13sp" />
 
                     <TextView
                         android:id="@+id/player_channelSubCount"
@@ -135,7 +147,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/subscribe"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    app:cornerRadius="999dp" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton

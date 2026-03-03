@@ -8,6 +8,13 @@ object PreferenceKeys {
     // Authentications
     const val TOKEN = "token"
     const val USERNAME = "username"
+    // YouTube (Google OAuth) authentication
+    const val YT_ACCESS_TOKEN = "yt_access_token"
+    const val YT_REFRESH_TOKEN = "yt_refresh_token"
+    const val YT_TOKEN_EXPIRES_AT_EPOCH_MILLIS = "yt_token_expires_at_epoch_millis"
+    const val YT_SCOPE = "yt_scope"
+    const val YT_CHANNEL_ID = "yt_channel_id"
+    const val YT_CHANNEL_TITLE = "yt_channel_title"
 
     // General
     const val LANGUAGE = "language"

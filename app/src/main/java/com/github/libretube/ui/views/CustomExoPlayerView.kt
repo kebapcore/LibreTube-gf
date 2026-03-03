@@ -2,12 +2,14 @@ package com.github.libretube.ui.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.text.format.DateUtils
 import android.util.AttributeSet
 import android.view.KeyEvent
@@ -28,6 +30,7 @@ import androidx.core.view.marginStart
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.C
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
@@ -82,6 +85,11 @@ import com.github.libretube.ui.sheets.SleepTimerSheet
 import com.github.libretube.ui.sheets.StatsSheet
 import com.github.libretube.ui.tools.SleepTimer
 import com.github.libretube.util.PlayingQueue
+import com.github.libretube.youtube.YouTubeAuthManager
+import com.github.libretube.youtube.YouTubeDataRepository
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import java.util.Locale
 import kotlin.math.ceil
 
@@ -316,6 +324,16 @@ class CustomExoPlayerView(
 
         binding.autoPlay.setOnCheckedChangeListener { _, isChecked ->
             PlayerHelper.autoPlayEnabled = isChecked
+        }
+
+        binding.captionsButton.setOnClickListener {
+            onCaptionsClicked()
+        }
+
+        binding.castButton.setOnClickListener {
+            runCatching {
+                context.startActivity(Intent(Settings.ACTION_CAST_SETTINGS))
+            }
         }
 
         // restore the duration type from the previous session
@@ -616,6 +634,48 @@ class CustomExoPlayerView(
 
     fun getOptionsMenuItems(): List<BottomSheetItem> = listOf(
         BottomSheetItem(
+            context.getString(R.string.quality),
+            R.drawable.ic_hd,
+            this::getCurrentResolutionSummary
+        ) {
+            onQualityClicked()
+        },
+        BottomSheetItem(
+            context.getString(R.string.playback_speed),
+            R.drawable.ic_speed,
+            {
+                "${player?.playbackParameters?.speed?.round(2)}x"
+            }
+        ) {
+            onPlaybackSpeedClicked()
+        },
+        BottomSheetItem(
+            context.getString(R.string.captions),
+            R.drawable.ic_caption,
+            {
+                player?.let { PlayerHelper.getCurrentPlayedCaptionFormat(it)?.language }
+                    ?: context.getString(R.string.none)
+            }
+        ) {
+            onCaptionsClicked()
+        },
+        BottomSheetItem(
+            context.getString(R.string.lock_screen),
+            if (isPlayerLocked) R.drawable.ic_locked else R.drawable.ic_unlocked
+        ) {
+            binding.lockPlayer.performClick()
+        },
+        *listOfNotNull(
+            if (YouTubeAuthManager.isSignedIn()) {
+                BottomSheetItem(
+                    context.getString(R.string.write_comment),
+                    R.drawable.ic_comment
+                ) {
+                    showYouTubeCommentDialog()
+                }
+            } else null
+        ).toTypedArray(),
+        BottomSheetItem(
             context.getString(R.string.repeat_mode),
             R.drawable.ic_repeat,
             {
@@ -641,15 +701,6 @@ class CustomExoPlayerView(
             onResizeModeClicked()
         },
         BottomSheetItem(
-            context.getString(R.string.playback_speed),
-            R.drawable.ic_speed,
-            {
-                "${player?.playbackParameters?.speed?.round(2)}x"
-            }
-        ) {
-            onPlaybackSpeedClicked()
-        },
-        BottomSheetItem(
             context.getString(R.string.sleep_timer),
             R.drawable.ic_sleep,
             {
@@ -669,28 +720,11 @@ class CustomExoPlayerView(
             onSleepTimerClicked()
         },
         BottomSheetItem(
-            context.getString(R.string.quality),
-            R.drawable.ic_hd,
-            this::getCurrentResolutionSummary
-        ) {
-            onQualityClicked()
-        },
-        BottomSheetItem(
             context.getString(R.string.audio_track),
             R.drawable.ic_audio,
             this::getCurrentAudioTrackTitle
         ) {
             onAudioStreamClicked()
-        },
-        BottomSheetItem(
-            context.getString(R.string.captions),
-            R.drawable.ic_caption,
-            {
-                player?.let { PlayerHelper.getCurrentPlayedCaptionFormat(it)?.language }
-                    ?: context.getString(R.string.none)
-            }
-        ) {
-            onCaptionsClicked()
         },
         BottomSheetItem(
             context.getString(R.string.stats_for_nerds),
@@ -699,6 +733,34 @@ class CustomExoPlayerView(
             onStatsClicked()
         }
     )
+
+    private fun showYouTubeCommentDialog() {
+        val videoId = playerCallback?.getVideoId().orEmpty()
+        if (videoId.isBlank()) return
+
+        val inputLayout = TextInputLayout(context).apply {
+            setPadding(0, 8f.dpToPx(), 0, 0)
+        }
+        val edit = TextInputEditText(inputLayout.context).apply {
+            hint = resources.getString(R.string.write_comment_hint)
+            minLines = 3
+            maxLines = 6
+        }
+        inputLayout.addView(edit)
+
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.write_comment)
+            .setView(inputLayout)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.send) { _, _ ->
+                val text = edit.text?.toString().orEmpty().trim()
+                if (text.isBlank()) return@setPositiveButton
+                activity.lifecycleScope.launch {
+                    runCatching { YouTubeDataRepository().comment(videoId, text) }
+                }
+            }
+            .show()
+    }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun getCurrentResolutionSummary(): String {

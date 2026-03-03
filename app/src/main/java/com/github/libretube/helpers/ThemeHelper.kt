@@ -27,10 +27,6 @@ object ThemeHelper {
             // GF Edition default: violet / deep pink accent (no Material You by default)
             accentColor = "violet"
             PreferenceHelper.putString(PreferenceKeys.ACCENT_COLOR, accentColor)
-        } else if (accentColor != "violet") {
-            // GF Edition: force violet accent for a consistent look
-            accentColor = "violet"
-            PreferenceHelper.putString(PreferenceKeys.ACCENT_COLOR, accentColor)
         }
 
         activity.setTheme(getTheme(accentColor))

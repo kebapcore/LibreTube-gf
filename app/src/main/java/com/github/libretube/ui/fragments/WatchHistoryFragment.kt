@@ -22,6 +22,7 @@ import com.github.libretube.db.obj.WatchHistoryItem
 import com.github.libretube.extensions.ceilHalf
 import com.github.libretube.extensions.dpToPx
 import com.github.libretube.extensions.setOnDismissListener
+import com.github.libretube.extensions.toID
 import com.github.libretube.helpers.NavigationHelper
 import com.github.libretube.ui.adapters.WatchHistoryAdapter
 import com.github.libretube.ui.base.DynamicLayoutManagerFragment
@@ -29,6 +30,8 @@ import com.github.libretube.ui.extensions.addOnBottomReachedListener
 import com.github.libretube.ui.models.CommonPlayerViewModel
 import com.github.libretube.ui.models.WatchHistoryModel
 import com.github.libretube.util.PlayingQueue
+import com.github.libretube.youtube.YouTubeAuthManager
+import com.github.libretube.youtube.YouTubeDataRepository
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +56,39 @@ class WatchHistoryFragment : DynamicLayoutManagerFragment(R.layout.fragment_watc
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         _binding = FragmentWatchHistoryBinding.bind(view)
         super.onViewCreated(view, savedInstanceState)
+
+        // Signed-in mode: show remote YouTube history playlist (read-only)
+        if (YouTubeAuthManager.isSignedIn()) {
+            binding.clear.isGone = true
+            binding.statusFilterChips.isGone = true
+            binding.watchHistoryRecView.adapter = watchHistoryAdapter
+            binding.watchHistoryRecView.isVisible = true
+            binding.historyEmpty.isGone = true
+
+            lifecycleScope.launch {
+                val items = withContext(Dispatchers.IO) {
+                    val related = YouTubeDataRepository().getMyChannelRelatedPlaylists()
+                    val historyPlaylistId = related?.watchHistory ?: return@withContext emptyList()
+                    val playlist = YouTubeDataRepository().getPlaylist(historyPlaylistId)
+                    playlist.relatedStreams.mapNotNull { s ->
+                        val id = s.url?.toID() ?: return@mapNotNull null
+                        s.toWatchHistoryItem(id)
+                    }
+                }
+                binding.historyEmpty.isVisible = items.isEmpty()
+                binding.watchHistoryRecView.isVisible = items.isNotEmpty()
+                binding.playAll.isVisible = items.isNotEmpty()
+                watchHistoryAdapter.submitList(items)
+
+                binding.playAll.setOnClickListener {
+                    if (items.isEmpty()) return@setOnClickListener
+                    PlayingQueue.add(*items.reversed().map { it.toStreamItem() }.toTypedArray())
+                    NavigationHelper.navigateVideo(requireContext(), items.last().videoId, keepQueue = true)
+                }
+            }
+
+            return
+        }
 
         commonPlayerViewModel.isMiniPlayerVisible.observe(viewLifecycleOwner) { isMiniPlayerVisible ->
             _binding?.watchHistoryRecView?.updatePadding(bottom = if (isMiniPlayerVisible) 64f.dpToPx() else 0)
